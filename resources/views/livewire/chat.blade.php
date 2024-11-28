@@ -12,7 +12,7 @@
                 @endif
 
                 @if ($message['role'] === 'assistant')
-                    <livewire:chat-response :key="$key" :messages="$messages" :prompt="$messages[$key - 1]"/>
+                    <livewire:chat-response :key="$key" :threadId="$threadId" :messages="$messages" :prompt="$messages[$key - 1]"/>
                 @endif
             @endforeach
         </div>

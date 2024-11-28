@@ -7,6 +7,7 @@ use OpenAI\Laravel\Facades\OpenAI;
 
 class ChatResponse extends Component
 {
+    public ?string $threadId = null;
     public array $prompt = [];
     public array $messages = [];
     public string $response = '';
@@ -18,12 +19,33 @@ class ChatResponse extends Component
 
     public function getResponse()
     {
-        $response = OpenAI::chat()->create([
-                        'model' => 'gpt-4',
-                        'messages' => $this->messages
-                    ]);
+        // dd($this->prompt, $this->messages);
+        $assistant = OpenAI::assistants()->retrieve('asst_LVVF4qqwCkAnRhrAOprBfEKB');
+
+        // add message to thread
+        OpenAI::threads()
+            ->messages()
+            ->create(
+                threadId: $this->threadId,
+                parameters: $this->prompt
+            );
+
+        $run = OpenAI::threads()
+                ->runs()
+                ->create($this->threadId, ['assistant_id' => $assistant->id]);
         
-        $this->response = $response->choices[0]->toArray()['message']['content'];
+        do {
+            sleep(1);
+    
+            $run = OpenAI::threads()->runs()->retrieve(
+                threadId: $run->threadId,
+                runId: $run->id
+            );
+        } while ($run->status !== 'completed');
+
+        $messages = OpenAI::threads()->messages()->list($this->threadId);
+
+        $this->response = $messages->data[0]->content[0]->text->value;
     }
 
     public function render()
