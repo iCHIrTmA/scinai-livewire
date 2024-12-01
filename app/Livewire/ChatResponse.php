@@ -14,12 +14,12 @@ class ChatResponse extends Component
 
     public function mount()
     {
+        // $this->enforceOutputSchema();
         $this->getResponse();
     }
 
     public function getResponse()
     {
-        // dd($this->prompt, $this->messages);
         $assistant = OpenAI::assistants()->retrieve('asst_LVVF4qqwCkAnRhrAOprBfEKB');
 
         // add message to thread

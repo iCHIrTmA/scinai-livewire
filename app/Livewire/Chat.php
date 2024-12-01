@@ -9,15 +9,27 @@ use OpenAI\Laravel\Facades\OpenAI;
 class Chat extends Component
 {
     #[Validate('required|max:1000')]
-
     public string $body = '';
+    #[Validate('required')]
     public ?string $threadId = null;
 
     public array $messages = [];
 
     public function mount()
     {
-        $this->messages[] = ['role' => 'system', 'content' => "You are a Justice of the Supreme Court of the Philippines who specializes in Environmental Law."];
+        $this->messages[] = [
+            'role' => 'system',
+            'content' => 'You are a Justice of the Supreme Court of the Philippines who specializes in summarizing cases decided by the Supreme Court.
+                You will be provided with a GR number and case name (e.g G.R. No. 101083 Oposa v. Factoran)
+                Your goal will be to summarize the case following the schema provided.
+                Here is a description of the parameters:
+                
+                - Super Summary: three sentence summary of what the case is
+                - Doctrine: the legal doctrine applied by the Supreme Court in its decision of the case
+                - Facts: array of strings listing the facts and events of the case leading to the case being submited to the Supreme Court
+                - Issues: array of main issues presented by the petitioner to be decided by the Supreme Court
+                - Ruling: Yes or No answers to issues presented along with explanation of relevant doctrine and rationale'
+        ];
 
         // initialize thread
         if (! $this->threadId) {
