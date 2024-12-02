@@ -10,12 +10,12 @@ class ChatResponse extends Component
     public ?string $threadId = null;
     public array $prompt = [];
     public array $messages = [];
-    public string $response = '';
+    public ?string $response = null;
 
     public function mount()
     {
         // $this->enforceOutputSchema();
-        $this->getResponse();
+        $this->js('$wire.getResponse()');
     }
 
     public function getResponse()
@@ -29,23 +29,26 @@ class ChatResponse extends Component
                 threadId: $this->threadId,
                 parameters: $this->prompt
             );
+        OpenAI::chat()
+            ->createStreamed([
+                'model' => 'gpt-3.5-turbo', // here you can change the model to your preference
+                'messages' => $this->messages,
+            ]);
 
-        $run = OpenAI::threads()
+        $stream = OpenAI::threads()
                 ->runs()
-                ->create($this->threadId, ['assistant_id' => $assistant->id]);
+                ->createStreamed($this->threadId, ['assistant_id' => $assistant->id]);
         
-        do {
-            sleep(1);
-    
-            $run = OpenAI::threads()->runs()->retrieve(
-                threadId: $run->threadId,
-                runId: $run->id
-            );
-        } while ($run->status !== 'completed');
+        foreach ($stream as $run) {
+            if ($run->event !== 'thread.message.delta') {
+                continue;
+            }
 
-        $messages = OpenAI::threads()->messages()->list($this->threadId);
+            $partial = $run->response->delta->content[0]->text->value;
 
-        $this->response = $messages->data[0]->content[0]->text->value;
+            $this->response .= $partial;
+            $this->stream('stream-'.$this->getId(), $partial);
+        }
     }
 
     public function render()
