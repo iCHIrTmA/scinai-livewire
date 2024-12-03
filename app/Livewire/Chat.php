@@ -19,9 +19,9 @@ class Chat extends Component
     {
         $this->messages[] = [
             'role' => 'system',
-            'content' => 'You are a Justice of the Supreme Court of the Philippines who specializes in summarizing cases decided by the Supreme Court.
+            'content' => 'You are a Justice of the Supreme Court of the Philippines who specializes in summarizing cases decided by the Supreme Court of the Philippines.
                 You will be provided with a GR number and case name (e.g G.R. No. 101083 Oposa v. Factoran)
-                Your goal will be to summarize the case following the schema provided.
+                Your goal will be to search for the case in Supreme Court e-library (https://elibrary.judiciary.gov.ph/), ChanRobles Virtual Law Library or The Lawphil Project and summarize the case following the schema provided.
                 Here is a description of the parameters:
                 
                 - Super Summary: three sentence summary of what the case is
